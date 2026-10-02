@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>NMS Accounting Setup Guide</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 40px auto; padding: 20px; }
+        h1 { color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        h2 { color: #0f172a; margin-top: 30px; }
+        .box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .important { color: #b91c1c; font-weight: bold; }
+        code { background: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-family: Consolas, monospace; }
+        ol li { margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Naqeebs Multi Services (NMS) - Setup Guide</h1>
+
+    <div class="box">
+        <p><strong>Project Name:</strong> NMS Accounting SaaS</p>
+        <p><strong>Base Currency:</strong> PKR</p>
+        <p><strong>Default Login:</strong> <code>admin</code> / <code>password</code></p>
+    </div>
+
+    <h2>1. Preparation</h2>
+    <ol>
+        <li>Copy the <strong>NMS</strong> folder to your XAMPP directory: <code>C:\xampp\htdocs\NMS</code>.</li>
+        <li>Place your logo as <code>nms_logo.png</code> in the root <code>NMS</code> folder.</li>
+    </ol>
+
+    <h2>2. Database Setup</h2>
+    <ol>
+        <li>Start XAMPP Control Panel and run <strong>Apache</strong> and <strong>MySQL</strong>.</li>
+        <li>Go to <code>http://localhost/phpmyadmin</code>.</li>
+        <li>Create a new database named: <strong style="color: #059669;">nms_accounting</strong>.</li>
+    </ol>
+
+    <h2>3. SQL Import Sequence</h2>
+    <p>Import these 11 files in the <code>sql/</code> folder in this exact order:</p>
+    <ol>
+        <li><code>schema.sql</code></li>
+        <li><code>auth.sql</code></li>
+        <li><code>inventory.sql</code></li>
+        <li><code>audit_trail.sql</code></li>
+        <li><code>budgeting.sql</code></li>
+        <li><code>reconciliation.sql</code></li>
+        <li><code>multi_currency.sql</code></li>
+        <li><code>recurring_invoices.sql</code></li>
+        <li><code>pakistan_tax_updates.sql</code></li>
+        <li><code>fix_schema_inconsistencies.sql</code></li>
+        <li><strong><code>nms_custom_setup.sql</code></strong> <span class="important">(Contains your specific Chart of Accounts)</span></li>
+    </ol>
+
+    <h2>4. Accessing the System</h2>
+    <p>Open your browser and visit: <code>http://localhost/NMS/login.php</code></p>
+    <ul>
+        <li><strong>Username:</strong> admin</li>
+        <li><strong>Password:</strong> password</li>
+    </ul>
+
+    <h2>5. NMS Chart of Accounts Reference</h2>
+    <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
+        <tr style="background: #f1f5f9;">
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Type</th>
+            <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Key Codes</th>
+        </tr>
+        <tr>
+            <td style="padding: 10px; border: 1px solid #ddd;">Assets</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">A001 (Cash), A002 (Petty Cash), A003 (Sulaman HBL), A004 (Khakan Bank)</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px; border: 1px solid #ddd;">Expenses</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">E001 to E035 (Detailed Operations)</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px; border: 1px solid #ddd;">Liabilities</td>
+            <td style="padding: 10px; border: 1px solid #ddd;">L002 (Abdullah Khan Safi), L003 (Danish Munir)</td>
+        </tr>
+    </table>
+</body>
+</html>

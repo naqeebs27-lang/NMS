@@ -1,0 +1,120 @@
+<?php
+require_once 'includes/config.php';
+require_once 'includes/functions.php';
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (isset($_SESSION['user_id'])) {
+    header("Location: index.php");
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    $stmt = $conn->prepare("SELECT id, username, password, role, full_name FROM users WHERE username = ? AND is_active = 1");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($user = $result->fetch_assoc()) {
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['user_role'] = $user['role'];
+            $_SESSION['full_name'] = $user['full_name'];
+
+            header("Location: index.php");
+            exit;
+        }
+    }
+    $error = "Invalid username or password";
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Pakistan Accounting SaaS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen">
+    <div class="max-w-md w-full p-6">
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-600 rounded-2xl shadow-lg shadow-emerald-200 mb-4">
+                <i class="fas fa-calculator text-white text-3xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-slate-800">Welcome Back</h1>
+            <p class="text-slate-500 mt-2">Sign in to manage your company accounts</p>
+        </div>
+
+        <div class="bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+            <?php if (isset($error)): ?>
+            <div class="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-sm flex items-center">
+                <i class="fas fa-exclamation-circle mr-2"></i> <?php echo $error; ?>
+            </div>
+            <?php endif; ?>
+
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input type="text" name="username" required
+                            class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                            placeholder="Enter your username">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <label class="block text-sm font-semibold text-slate-700">Password</label>
+                        <a href="#" class="text-xs text-emerald-600 hover:underline">Forgot password?</a>
+                    </div>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" name="password" required
+                            class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all"
+                            placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" id="remember" class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500">
+                    <label for="remember" class="ml-2 block text-sm text-slate-600">Remember this device</label>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-100 transition-all flex items-center justify-center">
+                    Sign In <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                </button>
+            </form>
+        </div>
+
+        <div class="mt-6 text-center">
+            <p class="text-sm text-slate-500 mb-3">Or sign in with</p>
+            <div class="flex items-center justify-center gap-3">
+                <a href="oauth_login.php?provider=google" class="inline-flex items-center px-4 py-2 bg-white border rounded shadow-sm">
+                    <i class="fab fa-google text-red-500 mr-2"></i> Google
+                </a>
+                <a href="oauth_login.php?provider=microsoft" class="inline-flex items-center px-4 py-2 bg-white border rounded shadow-sm">
+                    <i class="fab fa-microsoft text-sky-600 mr-2"></i> Microsoft
+                </a>
+            </div>
+        </div>
+
+        <p class="text-center mt-8 text-sm text-slate-500">
+            Don't have an account? <a href="#" class="text-emerald-600 font-bold hover:underline">Contact Administrator</a>
+        </p>
+    </div>
+</body>
+</html>
