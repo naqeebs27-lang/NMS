@@ -99,7 +99,7 @@ end;
 
 function FindMySqlExecutable: string;
 var
-  FindData: TWin32FindData;
+	FindData: TWin32FindData;
 	SearchHandle: Integer;
   LaragonMySqlRoot: string;
 begin
