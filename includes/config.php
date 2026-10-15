@@ -4,7 +4,7 @@ $configPath = __DIR__ . '/../config.json';
 if (!file_exists($configPath)) {
     // Allow CLI or installer to proceed; when accessed via web redirect to setup page
     if (php_sapi_name() !== 'cli') {
-        header('Location: /setup.php');
+        header('Location: /nms/setup.php');
         exit;
     }
 }
