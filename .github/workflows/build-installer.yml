@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install Inno Setup
         shell: pwsh
@@ -40,7 +40,7 @@ jobs:
           }
 
       - name: Upload installer artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: nms-windows-installer
           path: installer-output/NMS-Accounting-Setup.exe
