@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$db_name = $_POST['db_name'] ?? 'nms_accounting';
 	$app_db_user = trim($_POST['app_db_user'] ?? '') ?: $db_admin_user;
 	$app_db_pass = $_POST['app_db_pass'] ?? $db_admin_pass;
+	$application_username = trim($_POST['application_username'] ?? '');
+	$application_password = $_POST['application_password'] ?? '';
 	$create_app_user = isset($_POST['create_app_user']);
 
 	// Business details
@@ -89,6 +91,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			}
 			if (!isset($error)) {
 				$importSql(__DIR__ . '/sql/auth.sql', 'authentication schema');
+			}
+			if (!isset($error)) {
+				if ($application_username === '' || $application_password === '') {
+					$error = 'Application username and password are required.';
+				} else {
+					$applicationPasswordHash = password_hash($application_password, PASSWORD_DEFAULT);
+					$applicationEmail = $application_username . '@local.nms';
+					$stmtU = $adminConn->prepare("INSERT INTO users (username, password, full_name, email, role) VALUES (?, ?, ?, ?, 'Accountant')");
+					if (!$stmtU) {
+						$error = 'Failed to prepare application user creation: ' . $adminConn->error;
+					} else {
+						$stmtU->bind_param('ssss', $application_username, $applicationPasswordHash, $application_username, $applicationEmail);
+						if (!$stmtU->execute()) {
+							$error = 'Failed to create application user: ' . $stmtU->error;
+						}
+						$stmtU->close();
+					}
+				}
 			}
 
 			if (!isset($error)) {
