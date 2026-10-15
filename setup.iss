@@ -7,7 +7,8 @@ OutputBaseFilename=NMS_Setup
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=admin
-OutputDir=Output
+OutputDir=installer-output
+SetupIconFile=NMS Icon.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -17,12 +18,12 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "{app}"
 
 [Files]
-; Copy your website source folder 'nms' into the installation folder temporarily
-Source: "nms\*"; DestDir: "{app}\website"; Flags: ignoreversion recursesubdirs createallsubdirs
+; Copy the website source files from the repository root
+Source: "*"; DestDir: "{app}\website"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: ".git\*;.github\*;.idea\*;.vs\*;installer-output\*;setup.iss;inoscript.iss;iscc-build.log"
 
 [Icons]
 ; Desktop Shortcut pointing directly to the local login page URL
-Name: "{commondesktop}\NMS Accounting System"; Filename: "http://localhost/nms/login.php"; IconFilename: "{app}\website\favicon.ico"; IconIndex: 0; WorkingDir: "{app}\website"
+Name: "{commondesktop}\NMS Accounting System"; Filename: "http://localhost/nms/login.php"; IconFilename: "{app}\website\NMS Icon.ico"; IconIndex: 0; WorkingDir: "{app}\website"
 
 [Code]
 var
