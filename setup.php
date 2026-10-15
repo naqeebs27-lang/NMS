@@ -4,10 +4,10 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$db_host = $_POST['db_host'] ?? 'localhost';
-	$db_admin_user = $_POST['db_admin_user'] ?? 'root';
-	$db_admin_pass = $_POST['db_admin_pass'] ?? '';
+	$db_admin_user = 'root';
+	$db_admin_pass = '';
 	$db_name = $_POST['db_name'] ?? 'nms_accounting';
-	$app_db_user = $_POST['app_db_user'] ?? $db_admin_user;
+	$app_db_user = trim($_POST['app_db_user'] ?? '') ?: $db_admin_user;
 	$app_db_pass = $_POST['app_db_pass'] ?? $db_admin_pass;
 	$create_app_user = isset($_POST['create_app_user']);
 
@@ -48,23 +48,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				$escapedUser = $adminConn->real_escape_string($app_db_user);
 				$escapedPass = $adminConn->real_escape_string($app_db_pass);
 				$q1 = "CREATE USER IF NOT EXISTS '" . $escapedUser . "'@'localhost' IDENTIFIED BY '" . $escapedPass . "'";
-				$adminConn->query($q1);
+				if (!$adminConn->query($q1)) {
+					$error = "Failed to create application database user: " . $adminConn->error;
+				}
 				$q2 = "GRANT ALL PRIVILEGES ON `" . $adminConn->real_escape_string($db_name) . "`.* TO '" . $escapedUser . "'@'localhost'";
-				$adminConn->query($q2);
-				$adminConn->query("FLUSH PRIVILEGES");
+				if (!isset($error) && !$adminConn->query($q2)) {
+					$error = "Failed to grant application database permissions: " . $adminConn->error;
+				}
+				if (!isset($error) && !$adminConn->query("FLUSH PRIVILEGES")) {
+					$error = "Failed to flush database privileges: " . $adminConn->error;
+				}
 			}
 
-			// Run schema SQL using admin connection
+			// Run schema and authentication SQL using the admin connection.
 			$adminConn->select_db($db_name);
-			$schemaPath = __DIR__ . '/sql/schema.sql';
-			if (file_exists($schemaPath)) {
-				$schemaSQL = file_get_contents($schemaPath);
-				if (!$adminConn->multi_query($schemaSQL)) {
-					$error = "Failed to import schema: " . $adminConn->error;
-				} else {
-					// consume multi_query results
-					do { $adminConn->store_result(); } while ($adminConn->more_results() && $adminConn->next_result());
+			$importSql = function ($path, $label) use ($adminConn, &$error) {
+				if (!file_exists($path)) {
+					$error = "Missing SQL file: " . $path;
+					return false;
 				}
+
+				if (!$adminConn->multi_query(file_get_contents($path))) {
+					$error = "Failed to import " . $label . ": " . $adminConn->error;
+					return false;
+				}
+
+				$adminConn->store_result();
+				while ($adminConn->more_results()) {
+					if (!$adminConn->next_result()) {
+						$error = "Failed to import " . $label . ": " . $adminConn->error;
+						return false;
+					}
+					$adminConn->store_result();
+				}
+				return true;
+			};
+
+			if (!isset($error)) {
+				$importSql(__DIR__ . '/sql/schema.sql', 'schema');
+			}
+			if (!isset($error)) {
+				$importSql(__DIR__ . '/sql/auth.sql', 'authentication schema');
 			}
 
 			if (!isset($error)) {
@@ -125,14 +149,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				<div>
 					<label class="block text-sm font-medium">DB Host</label>
 					<input name="db_host" value="localhost" class="mt-1 w-full p-2 border rounded" />
-				</div>
-				<div>
-					<label class="block text-sm font-medium">DB Admin Username</label>
-					<input name="db_admin_user" value="root" class="mt-1 w-full p-2 border rounded" />
-				</div>
-				<div>
-					<label class="block text-sm font-medium">DB Admin Password</label>
-					<input name="db_admin_pass" type="password" class="mt-1 w-full p-2 border rounded" />
 				</div>
 				<div>
 					<label class="block text-sm font-medium">Application Database Name</label>
