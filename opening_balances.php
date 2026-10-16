@@ -6,19 +6,19 @@ require_once 'includes/functions.php';
 $ob_ref = 'OB-2025';
 $ob_date = '2025-08-01';
 
+$capital_result = $conn->query("SELECT a.id, a.code, a.name FROM accounts a JOIN account_types at ON a.type_id = at.id WHERE at.id = 3 AND (LOWER(a.name) LIKE '%capital%' OR a.code IN ('L0001', '3101')) ORDER BY CASE WHEN LOWER(a.name) LIKE '%capital%' THEN 1 WHEN a.code = 'L0001' THEN 2 WHEN a.code = '3101' THEN 3 ELSE 4 END, a.id LIMIT 1");
+$capital_account = $capital_result ? $capital_result->fetch_assoc() : null;
+$capital_id = (int)($capital_account['id'] ?? 0);
+$capital_code = $capital_account['code'] ?? 'L0001';
+$capital_name = $capital_account['name'] ?? 'Capital';
+
 // Handle Save
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_balances'])) {
     $balances = $_POST['balance'] ?? []; // account_id => amount
     $conn->begin_transaction();
     try {
-        // 1. Find or create the balancing account (Equity/Capital)
-        // We'll use L0001 (Capital) as the default balancing account if it exists
-        $cap_res = $conn->query("SELECT id FROM accounts WHERE code = 'L0001' LIMIT 1");
-        $capital_account = $cap_res->fetch_assoc();
-        $capital_id = $capital_account['id'] ?? 0;
-
         if (!$capital_id) {
-            throw new Exception("Balancing account (Capital L0001) not found.");
+            throw new Exception("No capital account was found. Add an Equity account such as Owner Capital before setting opening balances.");
         }
 
         // 2. Delete existing Opening Balance entry
@@ -30,11 +30,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_balances'])) {
         $net_balance = 0; // To balance against Capital
 
         foreach ($balances as $acc_id => $amount) {
+            $acc_id = (int)$acc_id;
+            if ($acc_id === $capital_id) continue;
+
             $amount = (float)$amount;
             if ($amount == 0) continue;
 
             // Get account type to determine if it's naturally Debit or Credit
-            $acc_info = $conn->query("SELECT at.normal_balance FROM accounts a JOIN account_types at ON a.type_id = at.id WHERE a.id = $acc_id")->fetch_assoc();
+            $acc_info_result = $conn->query("SELECT at.normal_balance FROM accounts a JOIN account_types at ON a.type_id = at.id WHERE a.id = $acc_id");
+            $acc_info = $acc_info_result ? $acc_info_result->fetch_assoc() : null;
             $normal = $acc_info['normal_balance'] ?? 'Debit';
 
             if ($normal == 'Debit') {
@@ -76,7 +80,7 @@ $sql = "SELECT a.id, a.code, a.name, at.name as type_name, at.normal_balance,
                (SELECT SUM(jel.credit) FROM journal_entry_lines jel JOIN journal_entries je ON jel.journal_entry_id = je.id WHERE jel.account_id = a.id AND je.reference = '$ob_ref') as ob_credit
         FROM accounts a
         JOIN account_types at ON a.type_id = at.id
-        WHERE a.code != 'L0001'
+         WHERE a.id != $capital_id
         ORDER BY a.code ASC";
 $accounts = $conn->query($sql);
 
@@ -150,7 +154,7 @@ include 'layouts/header.php';
             <div>
                 <h4 class="font-bold text-slate-800 text-sm">Balancing Logic</h4>
                 <p class="text-xs text-slate-600 mt-1 leading-relaxed">
-                    The software will automatically calculate the total Net Worth and post the difference to <strong>Capital (L0001)</strong>
+                     The software will automatically calculate the total Net Worth and post the difference to <strong><?php echo htmlspecialchars($capital_name . ' (' . $capital_code . ')'); ?></strong>
                     to ensure your books stay balanced. All existing 'OB-2025' entries will be replaced with these new values.
                 </p>
             </div>

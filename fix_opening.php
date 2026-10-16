@@ -1,5 +1,26 @@
 <?php
 require_once 'includes/config.php';
+require_once 'includes/functions.php';
+
+checkLogin();
+
+if (!isAdmin()) {
+    http_response_code(403);
+    exit('Administrator access is required to reset opening balances.');
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || ($_POST['confirm_reset'] ?? '') !== 'RESET') {
+    echo "<div style='font-family:sans-serif; padding:20px; border:1px solid #fca5a5; border-radius:8px; max-width:600px; margin:20px auto;'>";
+    echo "<h2 style='color:#991b1b;'>Reset Opening Balances</h2>";
+    echo "<p>This utility permanently deletes transaction data and resets product stock quantities. Chart of Accounts, Customers, Suppliers, and Products are preserved.</p>";
+    echo "<p><strong>Type RESET below to continue.</strong></p>";
+    echo "<form method='post'>";
+    echo "<input name='confirm_reset' required autocomplete='off' style='padding:10px; border:1px solid #cbd5e1; border-radius:6px; width:100%; box-sizing:border-box;'>";
+    echo "<button type='submit' style='margin-top:12px; background:#b91c1c; color:white; padding:10px 20px; border:0; border-radius:6px; font-weight:bold;'>Reset Opening Data</button>";
+    echo " <a href='index.php' style='margin-left:10px;'>Cancel</a>";
+    echo "</form></div>";
+    exit;
+}
 
 echo "<div style='font-family:sans-serif; padding:20px; border:1px solid #ccc; border-radius:8px; max-width:600px; margin:20px auto;'>";
 echo "<h2 style='color:#991b1b;'>NMS Global Transaction Reset</h2>";
@@ -15,6 +36,7 @@ try {
     $tables = [
         'journal_entry_lines',
         'journal_entries',
+        'Petty Cash_entries',
         'bill_items',
         'bills',
         'invoice_items',

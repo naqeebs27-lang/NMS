@@ -104,6 +104,12 @@ checkLogin();
             <a href="ledger.php" class="flex items-center px-4 py-2 text-sm rounded-lg sidebar-item <?php echo basename($_SERVER['PHP_SELF']) == 'ledger.php' ? 'sidebar-active text-white' : ''; ?>">
                 <i class="fas fa-book-open w-5 mr-3"></i> General Ledger
             </a>
+            <a href="fix_opening.php" class="flex items-center px-4 py-2 text-sm rounded-lg sidebar-item <?php echo basename($_SERVER['PHP_SELF']) == 'fix_opening.php' ? 'sidebar-active text-white' : ''; ?>">
+                <i class="fas fa-rotate w-5 mr-3"></i> Reset Opening Data
+            </a>
+            <a href="fix_opening.php" class="flex items-center px-4 py-2 text-sm rounded-lg sidebar-item <?php echo basename($_SERVER['PHP_SELF']) == 'fix_opening.php' ? 'sidebar-active text-white' : ''; ?>">
+                <i class="fas fa-scale-balanced w-5 mr-3"></i> Set Opening balance
+            </a>
 
             <div class="pt-4 pb-2 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">Reports</div>
             <a href="income_statement.php" class="flex items-center px-4 py-2 text-sm rounded-lg sidebar-item <?php echo basename($_SERVER['PHP_SELF']) == 'income_statement.php' ? 'sidebar-active text-white' : ''; ?>">
