@@ -24,7 +24,7 @@ function getAccountBalance($account_id, $conn, $start_date = null, $end_date = n
     $sql = "SELECT
                 SUM(debit) as total_debit,
                 SUM(credit) as total_credit,
-                at.normal_balance
+                MAX(at.normal_balance) as normal_balance
             FROM journal_entry_lines jel
             JOIN accounts a ON jel.account_id = a.id
             JOIN account_types at ON a.type_id = at.id
@@ -63,7 +63,7 @@ function getTotalByType($type_name, $conn, $start_date = null, $end_date = null)
     $sql = "SELECT
                 SUM(jel.debit) as total_debit,
                 SUM(jel.credit) as total_credit,
-                at.normal_balance
+                MAX(at.normal_balance) as normal_balance
             FROM journal_entry_lines jel
             JOIN accounts a ON jel.account_id = a.id
             JOIN account_types at ON a.type_id = at.id

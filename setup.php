@@ -93,6 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				$importSql(__DIR__ . '/sql/auth.sql', 'authentication schema');
 			}
 			if (!isset($error)) {
+				$importSql(__DIR__ . '/sql/reconciliation.sql', 'reconciliation schema');
+			}
+			if (!isset($error)) {
 				if ($application_username === '' || $application_password === '') {
 					$error = 'Application username and password are required.';
 				} else {
@@ -181,6 +184,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				<div>
 					<label class="block text-sm font-medium">Application DB Password (optional)</label>
 					<input name="app_db_pass" type="password" class="mt-1 w-full p-2 border rounded" />
+				</div>
+				<div>
+					<label class="block text-sm font-medium">Application Login Username</label>
+					<input name="application_username" required class="mt-1 w-full p-2 border rounded" />
+				</div>
+				<div>
+					<label class="block text-sm font-medium">Application Login Password</label>
+					<input name="application_password" type="password" required class="mt-1 w-full p-2 border rounded" />
 				</div>
 			<div>
 				<label class="block text-sm font-medium">Business / Company Name</label>
