@@ -15,4 +15,4 @@ CREATE TABLE IF NOT EXISTS `users` (
 
 -- Default admin: admin / admin123
 INSERT INTO `users` (`username`, `password`, `full_name`, `email`, `role`) VALUES
-('admin', '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', 'System Admin', 'admin@pakacc.pk', 'Admin');
+('admin', '$2y$10$SAPC5Qrh0QXUDna6MuCece1BBdxXNAzihf6RLzLNXwek7RxCccSLW', 'System Admin', 'admin@pakacc.pk', 'Admin');
